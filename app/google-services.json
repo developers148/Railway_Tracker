@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "372580575541",
+    "firebase_url": "https://railway-tracker-90f5a.firebaseio.com",
+    "project_id": "railway-tracker-90f5a",
+    "storage_bucket": "railway-tracker-90f5a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372580575541:android:da58483925042c6b34047c",
+        "android_client_info": {
+          "package_name": "com.leads.railwaytracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "372580575541-seqki59l0rahsoo7buhtjg1a546ml4ka.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.leads.railwaytracker",
+            "certificate_hash": "0166d8205c2bd6a744f98a5857729d814d3773c1"
+          }
+        },
+        {
+          "client_id": "372580575541-1c5rsq8med0anksk023qrltqodnkv2od.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDistlhV6GPM8712Fqo7qsbM-vy06DAndA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "372580575541-1c5rsq8med0anksk023qrltqodnkv2od.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

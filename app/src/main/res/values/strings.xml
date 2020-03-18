@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Railway Tracker</string>
+    <string name="mapbox_access_token">sk.eyJ1IjoiZGV2ZWxvcGVyczE0OCIsImEiOiJjazcydGliNjMwNWpyM2Vxb3JnYjA4c3E4In0.rxhm_kKVuLWgMdx39aL1Og</string>
 </resources>
