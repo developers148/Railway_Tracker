@@ -1,9 +1,17 @@
 package com.leads.railwaytracker;
 
 import android.annotation.SuppressLint;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -21,6 +29,9 @@ import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.BaseMarkerOptions;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -32,15 +43,25 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.style.light.Position;
+
+
+import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.utils.BitmapUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
+
+//saydabad jonopoder mor                            overbridge er niche ctg counter gular shamne
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -61,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     Point originpoint;
     Point destinationpoint;
     ArrayList<String> names;
+
 
 
     @SuppressLint("LogNotTimber")
@@ -92,23 +114,22 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
                         String[] latlng = detailmap.get(names.get(i)).split(",");
                         destinationpoint = Point.fromLngLat(Double.parseDouble(latlng[0]), Double.parseDouble(latlng[1]));
 
-                        if (CalculateDistance(originpoint.latitude(), originpoint.longitude(), destinationpoint.latitude(), destinationpoint.longitude()) <= 5.0000) {
-                            Log.e("origin lat", String.valueOf(originpoint.latitude()));
-                            Log.e("origin long", String.valueOf(originpoint.longitude()));
 
-                            Log.e("destination lat", String.valueOf(destinationpoint.latitude()));
-                            Log.e("destination long", String.valueOf(destinationpoint.longitude()));
+                       // Log.e("distance", String.valueOf(distance(originpoint.latitude(), originpoint.longitude(), destinationpoint.latitude(), destinationpoint.longitude(), "K")));
 
+                        if (distance(originpoint.latitude(), originpoint.longitude(), destinationpoint.latitude(), destinationpoint.longitude(), "K") <= 5.0000) {
 
-                            GeoJsonSource source = new GeoJsonSource(String.valueOf(i),Feature.fromGeometry(destinationpoint));
+                            GeoJsonSource source = new GeoJsonSource(String.valueOf(i), Feature.fromGeometry(destinationpoint));
                             mapboxMap.getStyle().addSource(source);
-
 
 
                             //add marker on map
 
 
-                            Log.e("distance", "you are close to " + names.get(i) + " Distance " + CalculateDistance(originpoint.latitude(), originpoint.longitude(), destinationpoint.latitude(), destinationpoint.longitude()));
+                            Log.e("distance", "you are close to " + names.get(i) + " Distance " + distance(originpoint.latitude(), originpoint.longitude(), destinationpoint.latitude(), destinationpoint.longitude(), "K"));
+
+                            getTrainByStation(names.get(i));
+
                         }
                     }
 
@@ -129,12 +150,27 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
             @Override
             public void onMapReady(@NonNull MapboxMap mapbox) {
                 mapboxMap = mapbox;
-                mapboxMap.setStyle(Style.MAPBOX_STREETS, new Style.OnStyleLoaded() {
+
+
+                Style.Builder style = new Style.Builder().fromUri(Style.MAPBOX_STREETS)
+                        .withImage("ORIGIN_ICON_ID", Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(
+                                getResources().getDrawable(R.drawable.red_marker))));
+
+
+                mapboxMap.setStyle(style, new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
                         // Toast.makeText(MainActivity.this, "MapLoaded Successfully", Toast.LENGTH_SHORT).show();
                         callback = new LocationChangeListeningActivityLocationCallback(MainActivity.this, style);
                         enableLocationComponent(style);
+
+
+
+
+
+
+
+
                     }
                 });
             }
@@ -142,25 +178,100 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     }
 
 
-    private double CalculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        double theta = lon1 - lon2;
-        double dist = Math.sin(deg2rad(lat1))
-                * Math.sin(deg2rad(lat2))
-                + Math.cos(deg2rad(lat1))
-                * Math.cos(deg2rad(lat2))
-                * Math.cos(deg2rad(theta));
-        dist = Math.acos(dist);
-        dist = rad2deg(dist);
-        dist = dist * 60 * 1.1515;
-        return (dist);
+
+
+    void getTrainByStation(String s) {
+
+        HashMap<String,GeoJsonSource> sources = new HashMap<>();
+        database.getReference().child("Trains").child(s).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+
+
+
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    String name = ds.getKey();
+
+
+                    String latlongstr = dataSnapshot.child(name).getValue().toString();
+
+                    double lat = Double.parseDouble(latlongstr.split(",")[0]);
+                    double lng = Double.parseDouble(latlongstr.split(",")[1]);
+
+
+
+
+                    if(mapboxMap!=null){
+                        mapboxMap.getStyle().addImage(("marker_icon"+name), BitmapFactory.decodeResource(
+                                getResources(), R.drawable.red_marker));
+
+                        GeoJsonSource source = new GeoJsonSource("source-id"+name, Feature.fromGeometry(Point.fromLngLat(lng,lat)));
+
+                        mapboxMap.getStyle().addSource(source);
+
+                        SymbolLayer layer = new SymbolLayer("layer-id"+name, "source-id"+name)
+                                .withProperties(PropertyFactory.iconImage("marker_icon"+name),
+                                PropertyFactory.iconIgnorePlacement(true),
+                                PropertyFactory.iconAllowOverlap(true));
+
+                        
+                        mapboxMap.getStyle().addLayer(layer);
+
+
+                        sources.put("source-id"+name,source);
+
+                    }
+
+                    database.getReference().child("Trains").child(s).child(name).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+
+
+
+                            String latlongstr = dataSnapshot.getValue().toString();
+
+                            double lat = Double.parseDouble(latlongstr.split(",")[0]);
+                            double lng = Double.parseDouble(latlongstr.split(",")[1]);
+
+
+                            sources.get("source-id"+name).setGeoJson(Point.fromLngLat(lng, lat));
+
+
+                            Log.e("datavaluechanged","train location changed");
+
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
     }
 
-    private double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
 
-    private double rad2deg(double rad) {
-        return (rad * 180.0 / Math.PI);
+    void AddMarker(MarkerOptions markerOptions) {
+
+        mapboxMap.addMarker(markerOptions);
+    }
+    void RemoveMarker(MarkerOptions markerOptions) {
+
+        mapboxMap.removeMarker(markerOptions.getMarker());
     }
 
 
@@ -309,5 +420,23 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         }
     }
 
+
+    private double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
+        if ((lat1 == lat2) && (lon1 == lon2)) {
+            return 0;
+        } else {
+            double theta = lon1 - lon2;
+            double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
+            dist = Math.acos(dist);
+            dist = Math.toDegrees(dist);
+            dist = dist * 60 * 1.1515;
+            if (unit.equals("K")) {
+                dist = dist * 1.609344;
+            } else if (unit.equals("N")) {
+                dist = dist * 0.8684;
+            }
+            return (dist);
+        }
+    }
 
 }
