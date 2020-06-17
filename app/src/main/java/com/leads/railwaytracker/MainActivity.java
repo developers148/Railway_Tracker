@@ -84,11 +84,24 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     TextInputEditText srcedt;
     ListView listView;
 
+    TextView contactTv;
+
 
     @SuppressLint("LogNotTimber")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        View view = findViewById(R.id.navigationview);
+        contactTv = view.findViewById(R.id.contact);
+//        contactTv.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(MainActivity.this, "contact", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
+
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
         setContentView(R.layout.activity_main);
         mapview = findViewById(R.id.mapview);

@@ -1,4 +1,44 @@
 <resources>
     <string name="app_name">Railway Tracker</string>
     <string name="mapbox_access_token">sk.eyJ1IjoiZGV2ZWxvcGVyczE0OCIsImEiOiJjazcydGliNjMwNWpyM2Vxb3JnYjA4c3E4In0.rxhm_kKVuLWgMdx39aL1Og</string>
+
+    <string name="golam_name">Golam Moula Mojumder</string>
+    <string name="golam_mail">toumalmojumder@gmail.com</string>
+
+    <string name="mychacl_name">Michacl Karmoker</string>
+    <string name="mychacl_mail">mskdesk@gmail.com</string>
+
+    <string name="tarek_name">Mahmudul Hasan Tarek</string>
+    <string name="tarek_mail">tarekint1@gmail.com</string>
+
+    <string name="ishtiaq_name">Ishtiaq Ahmad</string>
+    <string name="ishtiaq_mail">ishtiaq.ahmad5662@gmail.com</string>
+
+    <string name="irfan_name">MD. Irfan Hossain</string>
+    <string name="irfan_mail">irfanhossain.mizi@gmail.com</string>
+
+    <string name="fahim_name">Fahim Fahad Leon</string>
+    <string name="fahim_mail">fahimfahadleo@gmail.com</string>
+
+    <string name="project_title">ADVANCED PROFESSIONAL COACHING WITH INDUSTRY ATTACHMENT</string>
+    <string name="project_email">pd.sdmga@gmail.com</string>
+    <string name="project_number">+88–02–8181286</string>
+    <string name="convert_edit_text_hint_usd">USD</string>
+    <string name="convert_edittext_hint_bdt">BDT</string>
+    <string name="convert_text_view_to">To</string>
+    <string name="convert_textview_from">From</string>
+
+    <string name="reza_name">Md Mahmudul Hasan Reza</string>
+    <string name="reza_mail">mdreza112415@gmail.com</string>
+
+
+    <string name="senior_developer">Senior Developer</string>
+    <string name="junior_developer">Junior Developer</string>
+
+    <string name="about">Railway tracker is a solution which connects people and train in the same platform.
+        It also gives information about the actual position of the train in any location.</string>
+
+
+    <string name="company_name">LEADS Training &amp; Consulting Ltd and Apple Soft It Jv</string>
+
 </resources>

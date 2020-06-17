@@ -3,4 +3,9 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
+
+    <color name="contactColor">#D6D4D5</color>
+    <color name="main_text_color">#707070</color>
+    <color name="convert_text_color">#000</color>
+    <color name="convert_backgroung_color">#fff</color>
 </resources>
