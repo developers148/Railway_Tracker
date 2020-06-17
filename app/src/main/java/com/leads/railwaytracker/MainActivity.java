@@ -1,19 +1,29 @@
 package com.leads.railwaytracker;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,8 +39,6 @@ import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.BaseMarkerOptions;
-import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -43,11 +51,6 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
-
-
-import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
@@ -56,14 +59,10 @@ import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
 
-//saydabad jonopoder mor                            overbridge er niche ctg counter gular shamne
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity implements PermissionsListener {
 
@@ -82,7 +81,8 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     Point originpoint;
     Point destinationpoint;
     ArrayList<String> names;
-
+    TextInputEditText srcedt;
+    ListView listView;
 
 
     @SuppressLint("LogNotTimber")
@@ -92,11 +92,15 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
         setContentView(R.layout.activity_main);
         mapview = findViewById(R.id.mapview);
+        srcedt = findViewById(R.id.searchedt);
 
         database = FirebaseDatabase.getInstance();
         reference = database.getReference().child("stations");
         detailmap = new HashMap<>();
         names = new ArrayList<>();
+        trainName = new ArrayList<>();
+        listView = findViewById(R.id.listview);
+        listView.setVisibility(View.INVISIBLE);
 
         reference.addValueEventListener(new ValueEventListener() {
 
@@ -112,25 +116,32 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
                 if (gotvalue == 1) {
                     for (int i = 0; i < detailmap.size(); i++) {
                         String[] latlng = detailmap.get(names.get(i)).split(",");
+
+                        Log.e("crush",latlng[0]+"    "+latlng[1]);
+
+
                         destinationpoint = Point.fromLngLat(Double.parseDouble(latlng[0]), Double.parseDouble(latlng[1]));
 
 
-                       // Log.e("distance", String.valueOf(distance(originpoint.latitude(), originpoint.longitude(), destinationpoint.latitude(), destinationpoint.longitude(), "K")));
-
-                        if (distance(originpoint.latitude(), originpoint.longitude(), destinationpoint.latitude(), destinationpoint.longitude(), "K") <= 5.0000) {
-
-                            GeoJsonSource source = new GeoJsonSource(String.valueOf(i), Feature.fromGeometry(destinationpoint));
-                            mapboxMap.getStyle().addSource(source);
 
 
-                            //add marker on map
 
 
-                            Log.e("distance", "you are close to " + names.get(i) + " Distance " + distance(originpoint.latitude(), originpoint.longitude(), destinationpoint.latitude(), destinationpoint.longitude(), "K"));
+                        // Log.e("distance", String.valueOf(distance(originpoint.latitude(), originpoint.longitude(), destinationpoint.latitude(), destinationpoint.longitude(), "K")));
 
-                            getTrainByStation(names.get(i));
 
-                        }
+
+
+                        GeoJsonSource source = new GeoJsonSource(String.valueOf(i), Feature.fromGeometry(destinationpoint));
+                        mapboxMap.getStyle().addSource(source);
+
+
+                        //add marker on map
+
+                        getTrainByStation(names.get(i));
+
+
+
                     }
 
                 }
@@ -165,29 +176,60 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
                         enableLocationComponent(style);
 
 
-
-
-
-
-
-
                     }
                 });
+            }
+        });
+
+
+        srcedt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                listView.setVisibility(View.VISIBLE);
+                String word = s.toString();
+                ArrayList <String> finallist = new ArrayList<>();
+                if (!word.isEmpty()){
+
+                    for(int i = 0;i<trainName.size();i++){
+                        if(trainName.get(i).toLowerCase().contains(s.toString().toLowerCase())){
+                            finallist.add(trainName.get(i));
+                        }
+                    }
+                    if(finallist.size()!=0){
+                        listView.setAdapter(new ListviewAdapter(MainActivity.this,finallist));
+                    }else {
+                        listView.setAdapter(null);
+                        listView.setVisibility(View.INVISIBLE);
+                    }
+
+                }else {
+                    listView.setAdapter(null);
+                    listView.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
     }
 
 
-
+    ArrayList<String> trainName;
 
     void getTrainByStation(String s) {
 
-        HashMap<String,GeoJsonSource> sources = new HashMap<>();
+        HashMap<String, GeoJsonSource> sources = new HashMap<>();
         database.getReference().child("Trains").child(s).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-
 
 
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
@@ -196,30 +238,33 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
 
                     String latlongstr = dataSnapshot.child(name).getValue().toString();
 
+                    trainName.add(name);
+                    Log.e("name",name);
+
                     double lat = Double.parseDouble(latlongstr.split(",")[0]);
                     double lng = Double.parseDouble(latlongstr.split(",")[1]);
 
 
-
-
-                    if(mapboxMap!=null){
-                        mapboxMap.getStyle().addImage(("marker_icon"+name), BitmapFactory.decodeResource(
+                    if (mapboxMap != null) {
+                        mapboxMap.getStyle().addImage(("marker_icon" + s + name), BitmapFactory.decodeResource(
                                 getResources(), R.drawable.red_marker));
 
-                        GeoJsonSource source = new GeoJsonSource("source-id"+name, Feature.fromGeometry(Point.fromLngLat(lng,lat)));
+                        GeoJsonSource source = new GeoJsonSource("source-id" + s + name, Feature.fromGeometry(Point.fromLngLat(lng, lat)));
 
                         mapboxMap.getStyle().addSource(source);
 
-                        SymbolLayer layer = new SymbolLayer("layer-id"+name, "source-id"+name)
-                                .withProperties(PropertyFactory.iconImage("marker_icon"+name),
-                                PropertyFactory.iconIgnorePlacement(true),
-                                PropertyFactory.iconAllowOverlap(true));
+                        SymbolLayer layer = new SymbolLayer("layer-id" +s + name, "source-id" +s + name)
+                                .withProperties(PropertyFactory.textField(name),
+                                        PropertyFactory.iconImage("marker_icon" +s + name),
+                                        PropertyFactory.iconIgnorePlacement(true),
+                                        PropertyFactory.iconAllowOverlap(true));
 
-                        
+
+
                         mapboxMap.getStyle().addLayer(layer);
 
 
-                        sources.put("source-id"+name,source);
+                        sources.put("source-id" +s + name, source);
 
                     }
 
@@ -228,18 +273,16 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
 
-
-
                             String latlongstr = dataSnapshot.getValue().toString();
 
                             double lat = Double.parseDouble(latlongstr.split(",")[0]);
                             double lng = Double.parseDouble(latlongstr.split(",")[1]);
 
 
-                            sources.get("source-id"+name).setGeoJson(Point.fromLngLat(lng, lat));
+                            sources.get("source-id" + s  + name).setGeoJson(Point.fromLngLat(lng, lat));
 
 
-                            Log.e("datavaluechanged","train location changed");
+                            Log.e("datavaluechanged", "train location changed");
 
 
                         }
@@ -263,18 +306,6 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
 
 
     }
-
-
-    void AddMarker(MarkerOptions markerOptions) {
-
-        mapboxMap.addMarker(markerOptions);
-    }
-    void RemoveMarker(MarkerOptions markerOptions) {
-
-        mapboxMap.removeMarker(markerOptions.getMarker());
-    }
-
-
     /**
      * Initialize the Maps SDK's LocationComponent
      */
@@ -335,7 +366,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
 
     @Override
     public void onExplanationNeeded(List<String> permissionsToExplain) {
-        Toast.makeText(this, "R.string.user_location_permission_explanation", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Explanation needed", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -348,7 +379,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
                 }
             });
         } else {
-            Toast.makeText(this, "R.string.user_location_permission_not_granted", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Location Permission Not Granted.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -421,22 +452,106 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     }
 
 
-    private double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
-        if ((lat1 == lat2) && (lon1 == lon2)) {
-            return 0;
-        } else {
-            double theta = lon1 - lon2;
-            double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
-            dist = Math.acos(dist);
-            dist = Math.toDegrees(dist);
-            dist = dist * 60 * 1.1515;
-            if (unit.equals("K")) {
-                dist = dist * 1.609344;
-            } else if (unit.equals("N")) {
-                dist = dist * 0.8684;
+
+
+    public class ListviewAdapter extends ArrayAdapter<String> {
+        public ListviewAdapter(Context context, ArrayList<String> users) {
+            super(context, 0, users);
+        }
+
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+
+
+            final String model = getItem(position);
+            // Check if an existing view is being reused, otherwise inflate the view
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.itemlayout, parent, false);
             }
-            return (dist);
+            // Lookup view for data population
+
+            TextView tvHome = convertView.findViewById(R.id.itemid);
+            // Populate the data into the template view using the data object
+
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    srcedt.setText(model);
+                    DatabaseReference tempref = FirebaseDatabase.getInstance().getReference().child("Trains");
+                    tempref.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                                String name = ds.getKey();
+
+                                tempref.child(name).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                                            String train = ds.getKey();
+
+                                            if(train.toLowerCase().contains(model.toLowerCase())){
+                                                String value = ds.getValue().toString();
+                                                Log.e("value",value);
+                                                String [] latlng = value.split(",");
+
+                                                double lat = Double.parseDouble(latlng[0]);
+                                                double lon = Double.parseDouble(latlng[1]);
+
+                                                CameraPosition position = new CameraPosition.Builder()
+                                                        .target(new LatLng(lat, lon))
+                                                        .zoom(10)
+                                                        .tilt(20)
+                                                        .bearing(180)
+                                                        .build();
+
+                                                mapboxMap.animateCamera(CameraUpdateFactory
+                                                        .newCameraPosition(position), 5000);
+                                                listView.setVisibility(View.INVISIBLE);
+
+
+                                                InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                                                //Find the currently focused view, so we can grab the correct window token from it.
+                                                View view = MainActivity.this.getCurrentFocus();
+                                                //If no view currently has focus, create a new one, just so we can grab a window token from it
+                                                if (view == null) {
+                                                    view = new View(MainActivity.this);
+                                                }
+                                                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+
+
+                                            }
+
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
+                }
+            });
+
+            tvHome.setText(model);
+            // Return the completed view to render on screen
+            return convertView;
         }
     }
+
+
+
 
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/itemid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableStart="@drawable/search"
+        android:layout_margin="@dimen/_8sdp"
+        android:text="medicine name"
+        android:drawablePadding="@dimen/_8sdp"
+        style="@style/TextAppearance.AppCompat.Medium"/>
+
+
+</LinearLayout>
