@@ -2,7 +2,11 @@ package com.leads.railwaytracker;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
@@ -10,19 +14,27 @@ import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -57,11 +69,15 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 
 public class MainActivity extends AppCompatActivity implements PermissionsListener {
@@ -84,7 +100,10 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     TextInputEditText srcedt;
     ListView listView;
 
-    TextView contactTv;
+    CardView contactTv,aboutus;
+    NavigationView view;
+    ConstraintLayout layout;
+    PopupWindow popupWindow,popupWindow1;
 
 
     @SuppressLint("LogNotTimber")
@@ -92,20 +111,23 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        View view = findViewById(R.id.navigationview);
-        contactTv = view.findViewById(R.id.contact);
-//        contactTv.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(MainActivity.this, "contact", Toast.LENGTH_SHORT).show();
-//            }
-//        });
+
 
 
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
         setContentView(R.layout.activity_main);
+
+
         mapview = findViewById(R.id.mapview);
         srcedt = findViewById(R.id.searchedt);
+
+
+        view = findViewById(R.id.navigationview);
+        layout = findViewById(R.id.mainlayout);
+
+        contactTv = findViewById(R.id.contact);
+        aboutus = findViewById(R.id.about);
+
 
         database = FirebaseDatabase.getInstance();
         reference = database.getReference().child("stations");
@@ -114,6 +136,52 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         trainName = new ArrayList<>();
         listView = findViewById(R.id.listview);
         listView.setVisibility(View.INVISIBLE);
+
+
+
+
+        contactTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(LAYOUT_INFLATER_SERVICE);
+                View vi = inflater.inflate(R.layout.contact_us,null);
+                popupWindow = new PopupWindow(vi, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
+
+                popupWindow.showAtLocation(layout, Gravity.CENTER,0,0);
+            }
+        });
+
+
+
+
+
+
+
+
+       
+
+
+
+        aboutus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(LAYOUT_INFLATER_SERVICE);
+                View vi = inflater.inflate(R.layout.about_us,null);
+                 popupWindow1= new PopupWindow(vi, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
+
+                popupWindow1.showAtLocation(layout, Gravity.CENTER,0,0);
+            }
+        });
+
+        int result = ContextCompat.checkSelfPermission(this,ACCESS_FINE_LOCATION);
+        if(result == PackageManager.PERMISSION_GRANTED){
+
+        }else {
+            ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 121);
+        }
+
 
         reference.addValueEventListener(new ValueEventListener() {
 
@@ -375,6 +443,7 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
     }
 
     @Override
@@ -385,6 +454,10 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
     @Override
     public void onPermissionResult(boolean granted) {
         if (granted) {
+
+
+
+
             mapboxMap.getStyle(new Style.OnStyleLoaded() {
                 @Override
                 public void onStyleLoaded(@NonNull Style style) {
@@ -394,6 +467,14 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         } else {
             Toast.makeText(this, "Location Permission Not Granted.", Toast.LENGTH_LONG).show();
         }
+
+        Intent mStartActivity = new Intent(MainActivity.this, MainActivity.class);
+        int mPendingIntentId = 123456;
+        PendingIntent mPendingIntent = PendingIntent.getActivity(MainActivity.this, mPendingIntentId,    mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager mgr = (AlarmManager)MainActivity.this.getSystemService(Context.ALARM_SERVICE);
+        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
+        System.exit(0);
+
     }
 
     private class LocationChangeListeningActivityLocationCallback
@@ -564,7 +645,14 @@ public class MainActivity extends AppCompatActivity implements PermissionsListen
         }
     }
 
-
-
-
+    @Override
+    public void onBackPressed() {
+        if(popupWindow.isShowing()){
+            popupWindow.dismiss();
+        }else if(popupWindow1.isShowing()){
+            popupWindow1.dismiss();
+        }else {
+            super.onBackPressed();
+        }
+    }
 }

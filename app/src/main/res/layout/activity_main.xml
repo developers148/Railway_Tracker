@@ -5,11 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:openDrawer="start"
     tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/mainlayout"
         android:background="#fff">
 
 
@@ -102,51 +104,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/home"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_8sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:layout_marginEnd="@dimen/_8sdp"
-                    app:contentPadding="8dp"
-                    card_view:cardCornerRadius="5dp"
-                    card_view:cardElevation="2dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:drawableStart="@drawable/home"
-                        android:drawablePadding="8dp"
-                        android:gravity="center"
-                        android:text="Home"
-                        android:textColor="#000" />
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/settings"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_8sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:layout_marginEnd="@dimen/_8sdp"
-                    app:contentPadding="8dp"
-                    card_view:cardCornerRadius="5dp"
-                    card_view:cardElevation="2dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:drawableStart="@drawable/settings"
-                        android:drawablePadding="8dp"
-                        android:gravity="center"
-                        android:text="Settings"
-                        android:textColor="#000" />
-                </androidx.cardview.widget.CardView>
-
                 <androidx.cardview.widget.CardView
                     android:id="@+id/about"
                     android:layout_width="match_parent"
@@ -168,51 +125,6 @@
                         android:text="About"
                         android:textColor="#000" />
                 </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/privacy"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_8sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:layout_marginEnd="@dimen/_8sdp"
-                    app:contentPadding="8dp"
-                    card_view:cardCornerRadius="5dp"
-                    card_view:cardElevation="2dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:drawableStart="@drawable/policy"
-                        android:drawablePadding="8dp"
-                        android:gravity="center"
-                        android:text="Privacy policy"
-                        android:textColor="#000" />
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/help"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_8sdp"
-                    android:layout_marginTop="@dimen/_8sdp"
-                    android:layout_marginEnd="@dimen/_8sdp"
-                    app:contentPadding="8dp"
-                    card_view:cardCornerRadius="5dp"
-                    card_view:cardElevation="2dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:drawableStart="@drawable/help"
-                        android:drawablePadding="8dp"
-                        android:gravity="center"
-                        android:text="Help"
-                        android:textColor="#000" />
-                </androidx.cardview.widget.CardView>
-
                 <androidx.cardview.widget.CardView
 
                     android:layout_width="match_parent"
@@ -222,10 +134,11 @@
                     android:layout_marginEnd="@dimen/_8sdp"
                     app:contentPadding="8dp"
                     card_view:cardCornerRadius="5dp"
+                    android:id="@+id/contact"
                     card_view:cardElevation="2dp">
 
                     <TextView
-                        android:id="@+id/contact"
+
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
